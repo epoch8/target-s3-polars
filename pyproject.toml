@@ -81,3 +81,4 @@ readme = "README.md"
 python = ">=3.10,<3.13"
 meltano = "^3.7.7"
 singer-sdk = {version = ">=0.46.4,<0.47.0", extras = ["faker"]}
+polars = "^1.30.0"
