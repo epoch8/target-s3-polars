@@ -76,7 +76,7 @@ class S3PolarsSink(BatchSink):
         #     csvfile.write(record)
 
         # import logging
-        # logger = logging.Logger("BATCH_ID")
+        # logger = logging.Logger("PROCESS_RECORD")
         # logger.warning(f'CONTEXT: {context}')
         # logger.warning(f'STREAM_NAME: {self.stream_name}')
         # logger.warning(f'{self.stream_name}-{context["batch_id"]}')
@@ -85,7 +85,8 @@ class S3PolarsSink(BatchSink):
         self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.concat(
             [
                 self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'],
-                pl.from_dicts([record]),
+                # pl.from_dicts([record]),
+                pl.from_dicts([{"record": f"{record}"}]),
             ],
             how="diagonal_relaxed"
         )
