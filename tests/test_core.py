@@ -7,7 +7,7 @@ import typing as t
 import pytest
 from singer_sdk.testing import get_target_test_class
 
-from target_s3_polars.target import Target.
+from target_s3_polars.target import S3PolarsTarget
 
 # TODO: Initialize minimal target config
 SAMPLE_CONFIG: dict[str, t.Any] = {}
@@ -15,7 +15,7 @@ SAMPLE_CONFIG: dict[str, t.Any] = {}
 
 # Run standard built-in target tests from the SDK:
 StandardTargetTests = get_target_test_class(
-    target_class=Target.,
+    target_class=S3PolarsTarget,
     config=SAMPLE_CONFIG,
 )
 

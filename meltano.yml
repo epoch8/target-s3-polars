@@ -27,16 +27,46 @@ plugins:
 
     # TODO: Declare settings and their types here:
     settings:
-    - name: username
-      label: Username
-      description: The username to use for authentication
 
-    - name: password
+    - name: aws_access_key_id
       kind: password
-      label: Password
-      description: The password to use for authentication
       sensitive: true
+      label: "AWS access key id"
+      description: "AWS access key id"
+
+    - name: aws_secret_access_key
+      kind: password
+      sensitive: true
+      label: "AWS secret access key"
+      description: "AWS secret access key"
+
+    - name: s3_endpoint_url
+      label: "S3 endpoint URL"
+      description: "S3 endpoint URL"
+
+    - name: filepath
+      label: "Output File Path"
+      description: "The path to the target output file"
+
+    - name: file_naming_scheme
+      label: "File Naming Scheme"
+      description: "The scheme with which output files will be named"
+
+    - name: batch_size
+      label: "Output File batch size"
+      description: "Number of records per file"
+
+    # - name: username
+    #   label: Username
+    #   description: The username to use for authentication
+
+    # - name: password
+    #   kind: password
+    #   label: Password
+    #   description: The password to use for authentication
+    #   sensitive: true
 
     # TODO: Declare required settings here:
     settings_group_validation:
-    - [username, password]
+    # - [username, password]
+    - [aws_access_key_id, aws_secret_access_key, s3_endpoint_url]

@@ -1,1 +1,1 @@
-"""Target for .."""
+"""Target for S3Polars."""

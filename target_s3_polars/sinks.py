@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 class S3PolarsSink(BatchSink):
-    """. target sink class."""
+    """S3Polars target sink class."""
 
     def __init__(self, target, stream_name, schema, key_properties):
         super().__init__(target, stream_name, schema, key_properties)
@@ -99,7 +99,7 @@ class S3PolarsSink(BatchSink):
             format="parquet",
         )
 
-        output_file = f"s3://{self.config["s3_bucket"]}/{self.config["filepath"]}{file_naming_scheme}"
+        output_file = f"s3://{self.config['filepath']}{file_naming_scheme}"
 
         with fsspec.open(output_file, "wb") as f:
             self.pl_batches[context["batch_id"]].write_parquet(f, compression="snappy")

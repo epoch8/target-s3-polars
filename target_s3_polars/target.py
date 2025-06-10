@@ -40,13 +40,6 @@ class S3PolarsTarget(Target):
             description="S3 endpoint URL",
         ),
         th.Property(
-            "s3_bucket",
-            th.StringType(nullable=False),
-            required=True,
-            title="S3 bucket name",
-            description="S3 bucket name",
-        ),
-        th.Property(
             "filepath",
             th.StringType(nullable=False),
             required=False,
