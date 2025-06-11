@@ -46,15 +46,19 @@ plugins:
 
     - name: filepath
       label: "Output File Path"
-      description: "The path to the target output file"
+      description: "The path to the target output file. Default: \"target_s3_polars/\"."
 
     - name: file_naming_scheme
       label: "File Naming Scheme"
-      description: "The scheme with which output files will be named"
+      description: "The scheme with which output files will be named. Default: \"{stream}-{timestamp}.{format}\"."
 
     - name: batch_size
       label: "Output File batch size"
-      description: "Number of records per file"
+      description: "Number of records per file. Default: 10000."
+
+    - name: record_as_json
+      label: "Save records as one JSON column"
+      description: "Complicated NoSQL schemas might be saved as one JSON column. Default: False."
 
     # - name: username
     #   label: Username

@@ -44,7 +44,7 @@ class S3PolarsTarget(Target):
             th.StringType(nullable=False),
             required=False,
             title="Output File Path",
-            description="The path to the target output file",
+            description="The path to the target output file. Default: \"target_s3_polars/\".",
             default="target_s3_polars/",
         ),
         th.Property(
@@ -52,7 +52,7 @@ class S3PolarsTarget(Target):
             th.StringType(nullable=False),
             required=False,
             title="File Naming Scheme",
-            description="The scheme with which output files will be named",
+            description="The scheme with which output files will be named. Default: \"{stream}-{timestamp}.{format}\".",
             default="{stream}-{timestamp}.{format}",
         ),
         th.Property(
@@ -60,8 +60,16 @@ class S3PolarsTarget(Target):
             th.IntegerType(nullable=False),
             required=False,
             title="Output File batch size",
-            description="Number of records per file",
+            description="Number of records per file. Default: 10000.",
             default=10000,
+        ),
+        th.Property(
+            "record_as_json",
+            th.BooleanType(nullable=False),
+            required=False,
+            title="Save records as one JSON column",
+            description="Complicated NoSQL schemas might be saved as one JSON column. Default: False.",
+            default=False,
         ),
     ).to_dict()
 
