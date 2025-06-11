@@ -86,7 +86,7 @@ class S3PolarsSink(BatchSink):
         self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.concat(
             [
                 self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'],
-                pl.from_dicts([{"record": json.dumps(record, use_decimal=True)}]) if self.config['record_as_json'] else pl.from_dicts([record]),
+                pl.from_dicts([{"record": json.dumps(record, use_decimal=True, default=str)}]) if self.config['record_as_json'] else pl.from_dicts([record]),
             ],
             how="diagonal_relaxed"
         )
