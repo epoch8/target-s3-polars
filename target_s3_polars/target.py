@@ -57,7 +57,7 @@ class S3PolarsTarget(Target):
         ),
         th.Property(
             "batch_size",
-            th.IntegerType(nullable=False),
+            th.IntegerType(nullable=False, minimum=1),
             required=False,
             title="Output File batch size",
             description="Number of records per file. Default: 10000.",
