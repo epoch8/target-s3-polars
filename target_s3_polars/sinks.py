@@ -83,12 +83,11 @@ class S3PolarsSink(BatchSink):
         # logger.warning(f'{self.stream_name}-{context["batch_id"]}')
         # logger.warning(f'RECORD: {record}')
 
-        self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.concat(
-            [
-                self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'],
-                pl.from_dicts([{"record": json.dumps(record, use_decimal=True, default=str)}]) if self.config['record_as_json'] else pl.from_dicts([record]),
-            ],
-            how="diagonal_relaxed"
+        if f'{self.stream_name}-{context["batch_id"]}' not in self.pl_batches:
+            self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = []
+
+        self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'].append(
+            pl.from_dicts([{"record": json.dumps(record, use_decimal=True, default=str)}]) if self.config['record_as_json'] else pl.from_dicts([record])
         )
 
     def process_batch(self, context: dict) -> None:
@@ -111,4 +110,9 @@ class S3PolarsSink(BatchSink):
         output_file = f"s3://{self.config['filepath']}{file_naming_scheme}"
 
         with fsspec.open(output_file, "wb") as f:
-            self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'].write_parquet(f, compression="snappy")
+            pl.concat(
+                self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'],
+                how="diagonal_relaxed"
+            ).write_parquet(f, compression="snappy")
+
+        self.pl_batches.pop(f'{self.stream_name}-{context["batch_id"]}')
