@@ -59,7 +59,7 @@ class S3PolarsSink(BatchSink):
         # batch_key = context["batch_id"]
         # context["file_path"] = f"{batch_key}.csv"
 
-        self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.DataFrame()
+        # self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.DataFrame()
 
     def process_record(self, record: dict, context: dict) -> None:
         """Process the record.
