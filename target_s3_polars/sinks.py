@@ -76,19 +76,12 @@ class S3PolarsSink(BatchSink):
         # with open(context["file_path"], "a") as csvfile:
         #     csvfile.write(record)
 
-        # import logging
-        # logger = logging.Logger("PROCESS_RECORD")
-        # logger.warning(f'CONTEXT: {context}')
-        # logger.warning(f'STREAM_NAME: {self.stream_name}')
-        # logger.warning(f'{self.stream_name}-{context["batch_id"]}')
-        # logger.warning(f'RECORD: {record}')
+        batch_name = f"{self.stream_name}-{context['batch_id']}"
 
-        if f'{self.stream_name}-{context["batch_id"]}' not in self.pl_batches:
-            self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = []
+        if batch_name not in self.pl_batches:
+            self.pl_batches[batch_name] = []
 
-        self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'].append(
-            pl.from_dicts([{"record": json.dumps(record, use_decimal=True, default=str)}]) if self.config['record_as_json'] else pl.from_dicts([record])
-        )
+        self.pl_batches[batch_name].append(record)
 
     def process_batch(self, context: dict) -> None:
         """Write out any prepped records and return once fully written.
@@ -100,7 +93,7 @@ class S3PolarsSink(BatchSink):
         # ------
         # client.upload(context["file_path"])  # Upload file
         # Path(context["file_path"]).unlink()  # Delete local copy
-        
+
         file_naming_scheme = self.config["file_naming_scheme"].format(
             stream=self.stream_name,
             timestamp=datetime.now().strftime('%Y%m%dT%H%M%S'),
@@ -108,11 +101,18 @@ class S3PolarsSink(BatchSink):
         )
 
         output_file = f"s3://{self.config['filepath']}{file_naming_scheme}"
+        batch_name = f"{self.stream_name}-{context['batch_id']}"
 
         with fsspec.open(output_file, "wb") as f:
-            pl.concat(
-                self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'],
-                how="diagonal_relaxed"
-            ).write_parquet(f, compression="snappy")
+            if self.config["record_as_json"]:
+                pl.DataFrame(
+                    [
+                        {"record_as_json": json.dumps(record, use_decimal=True, default=str)}
+                        for record
+                        in self.pl_batches[batch_name]
+                    ]
+                ).write_parquet(f, compression="snappy")
+            else:
+                pl.DataFrame(self.pl_batches[batch_name]).write_parquet(f, compression="snappy")
 
-        self.pl_batches.pop(f'{self.stream_name}-{context["batch_id"]}')
+        self.pl_batches.pop(batch_name)
