@@ -60,8 +60,6 @@ class S3PolarsSink(BatchSink):
         # batch_key = context["batch_id"]
         # context["file_path"] = f"{batch_key}.csv"
 
-        # self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.DataFrame()
-
     def record_as_json(self, batch_name):
         if self.config["record_as_json"]:
             return [
@@ -72,12 +70,12 @@ class S3PolarsSink(BatchSink):
 
     def dicts_to_pl(self, batch_name):
         if batch_name not in self.pl_batches:
-            self.pl_batches[batch_name] = pl.DataFrame(self.record_as_json(batch_name))
+            self.pl_batches[batch_name] = pl.DataFrame(self.record_as_json(batch_name), infer_schema_length=None)
         else:
             self.pl_batches[batch_name] = pl.concat(
                 [
                     self.pl_batches[batch_name],
-                    pl.DataFrame(self.record_as_json(batch_name)),
+                    pl.DataFrame(self.record_as_json(batch_name), infer_schema_length=None),
                 ],
                 how="diagonal_relaxed"
             )
