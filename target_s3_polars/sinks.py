@@ -17,6 +17,7 @@ class S3PolarsSink(BatchSink):
     def __init__(self, target, stream_name, schema, key_properties):
         super().__init__(target, stream_name, schema, key_properties)
 
+        self.batches: dict = {}
         self.pl_batches: dict = {}
 
         os.environ["FSSPEC_S3_ENDPOINT_URL"] = target.config.get("s3_endpoint_url")
@@ -61,6 +62,27 @@ class S3PolarsSink(BatchSink):
 
         # self.pl_batches[f'{self.stream_name}-{context["batch_id"]}'] = pl.DataFrame()
 
+    def record_as_json(self, batch_name):
+        if self.config["record_as_json"]:
+            return [
+                {"record_as_json": json.dumps(record, use_decimal=True, default=str)}
+                for record in self.batches[batch_name]
+            ]
+        return self.batches[batch_name]
+
+    def dicts_to_pl(self, batch_name):
+        if batch_name not in self.pl_batches:
+            self.pl_batches[batch_name] = pl.DataFrame(self.record_as_json(batch_name))
+        else:
+            self.pl_batches[batch_name] = pl.concat(
+                [
+                    self.pl_batches[batch_name],
+                    pl.DataFrame(self.record_as_json(batch_name)),
+                ],
+                how="diagonal_relaxed"
+            )
+        self.batches.pop(batch_name)
+
     def process_record(self, record: dict, context: dict) -> None:
         """Process the record.
 
@@ -78,10 +100,13 @@ class S3PolarsSink(BatchSink):
 
         batch_name = f"{self.stream_name}-{context['batch_id']}"
 
-        if batch_name not in self.pl_batches:
-            self.pl_batches[batch_name] = []
+        if batch_name not in self.batches:
+            self.batches[batch_name] = []
 
-        self.pl_batches[batch_name].append(record)
+        self.batches[batch_name].append(record)
+
+        if len(self.batches[batch_name]) > 10000:
+            self.dicts_to_pl(batch_name)
 
     def process_batch(self, context: dict) -> None:
         """Write out any prepped records and return once fully written.
@@ -103,16 +128,10 @@ class S3PolarsSink(BatchSink):
         output_file = f"s3://{self.config['filepath']}{file_naming_scheme}"
         batch_name = f"{self.stream_name}-{context['batch_id']}"
 
+        if batch_name in self.batches:
+            self.dicts_to_pl(batch_name)
+
         with fsspec.open(output_file, "wb") as f:
-            if self.config["record_as_json"]:
-                pl.DataFrame(
-                    [
-                        {"record_as_json": json.dumps(record, use_decimal=True, default=str)}
-                        for record
-                        in self.pl_batches[batch_name]
-                    ]
-                ).write_parquet(f, compression="snappy")
-            else:
-                pl.DataFrame(self.pl_batches[batch_name]).write_parquet(f, compression="snappy")
+            self.pl_batches[batch_name].write_parquet(f, compression="snappy")
 
         self.pl_batches.pop(batch_name)
