@@ -14,6 +14,7 @@ class S3PolarsTarget(Target):
     """Sample target for S3PolarsSink."""
 
     name = "target-s3-polars"
+    _MAX_RECORD_AGE_IN_MINUTES: float = 20.0
 
     config_jsonschema = th.PropertiesList(
         th.Property(
