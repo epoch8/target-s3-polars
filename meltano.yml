@@ -60,6 +60,10 @@ plugins:
       label: "Save records as one JSON column"
       description: "Complicated NoSQL schemas might be saved as one JSON column. Default: False."
 
+    - name: max_record_age_in_minutes
+      label: "Max record age in minutes"
+      description: "Max record age in minutes before trigger drain. Default: 5."
+
     # - name: username
     #   label: Username
     #   description: The username to use for authentication

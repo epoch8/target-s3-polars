@@ -14,7 +14,6 @@ class S3PolarsTarget(Target):
     """Sample target for S3PolarsSink."""
 
     name = "target-s3-polars"
-    _MAX_RECORD_AGE_IN_MINUTES: float = 20.0
 
     config_jsonschema = th.PropertiesList(
         th.Property(
@@ -72,9 +71,21 @@ class S3PolarsTarget(Target):
             description="Complicated NoSQL schemas might be saved as one JSON column. Default: False.",
             default=False,
         ),
+        th.Property(
+            "max_record_age_in_minutes",
+            th.IntegerType(nullable=False, minimum=1),
+            required=False,
+            title="Max record age in minutes",
+            description="Max record age in minutes before trigger drain. Default: 5.",
+            default=5,
+        ),
     ).to_dict()
 
     default_sink_class = S3PolarsSink
+
+    def __init__(self, *, config = None, parse_env_config = False, validate_config = True, setup_mapper = True, message_reader = None):
+        super().__init__(config=config, parse_env_config=parse_env_config, validate_config=validate_config, setup_mapper=setup_mapper, message_reader=message_reader)
+        self._MAX_RECORD_AGE_IN_MINUTES = self.config["max_record_age_in_minutes"]
 
 
 if __name__ == "__main__":
