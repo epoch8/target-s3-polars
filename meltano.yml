@@ -64,6 +64,10 @@ plugins:
       label: "Max record age in minutes"
       description: "Max record age in minutes before trigger drain. Default: 5."
 
+    - name: columns_to_str
+      label: "Columns to string"
+      description: "List of columns to cast to string"
+
     # - name: username
     #   label: Username
     #   description: The username to use for authentication

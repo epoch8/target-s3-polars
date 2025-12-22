@@ -129,6 +129,12 @@ class S3PolarsSink(BatchSink):
         if batch_name in self.batches:
             self.dicts_to_pl(batch_name)
 
+        for column in self.config["columns_to_str"]:
+            if column in self.pl_batches[batch_name].columns:
+                self.pl_batches[batch_name] = self.pl_batches[batch_name].with_columns(
+                    pl.col(column).cast(pl.String).alias(f"{column}__str")
+                ).drop(column)
+
         with fsspec.open(output_file, "wb") as f:
             self.pl_batches[batch_name].write_parquet(f, compression="snappy")
 

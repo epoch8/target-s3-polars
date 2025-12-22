@@ -79,6 +79,14 @@ class S3PolarsTarget(Target):
             description="Max record age in minutes before trigger drain. Default: 5.",
             default=5,
         ),
+        th.Property(
+            "columns_to_str",
+            th.ArrayType(th.StringType),
+            required=False,
+            title="Columns to string",
+            description="List of columns to cast to string",
+            default=[],
+        ),
     ).to_dict()
 
     default_sink_class = S3PolarsSink
